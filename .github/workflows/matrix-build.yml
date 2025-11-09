@@ -1,0 +1,50 @@
+name: Matrix Build with Artifacts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18, 20]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: matrix-4cf24a1
+        run: echo "Building for ${{ matrix.os }} with Node ${{ matrix.node-version }}"
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Generate build artifact
+        run: |
+          echo "Build Information" > build-output.txt
+          echo "==================" >> build-output.txt
+          echo "OS: ${{ matrix.os }}" >> build-output.txt
+          echo "Node Version: ${{ matrix.node-version }}" >> build-output.txt
+          echo "Build Time: $(date)" >> build-output.txt
+          echo "Runner: ${{ runner.name }}" >> build-output.txt
+          echo "Architecture: ${{ runner.arch }}" >> build-output.txt
+          echo "" >> build-output.txt
+          echo "Node Info:" >> build-output.txt
+          node --version >> build-output.txt
+          npm --version >> build-output.txt
+        shell: bash
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-4cf24a1-${{ matrix.os }}-node${{ matrix.node-version }}
+          path: build-output.txt
+          retention-days: 7
